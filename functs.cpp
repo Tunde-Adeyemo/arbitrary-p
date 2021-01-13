@@ -1,6 +1,10 @@
 /*
-		Xroot uses RdXlr to read a precalculated root in NXlongR form from a 
-		file and use iterations as in Nroot to improve precision.
+		Here we define the structure describing our high precision 
+		number and create the basic functions we require to manipulate and maintain them.
+		Functions include the basic arithmetic functions of addition subtraction 
+		multiplication and division ae well as some other useful process such as conversion 
+		of an integer into a type of our number, direct calculation of a high precision 
+		cosine or sine value or the high preecision calculation of a root.
 */
 
 
