@@ -1,21 +1,23 @@
 
 /*
+Place this file in the same directory as functns.cpp to compile.
 main(), tests the routines in functnw.cpp and writes the output to local file tstfns.txt, it uses invtan() and
 the Gregory series to efficiently calculate Pi to the desired precision then it uses NRoot() to produce root(1/2),
 knowing cos(Pi/4) = root(1/2) it then calculates cos(Pi/4) - root(1/2) and writes the value. Finally it writes the 
 number of seconds used for computation.
 */
 
+#include "./functns.cpp"
 int main(int argc, char* argv[])
 {
 	//FILE* OutFile;
- 	NxlongR f,x,f2,r5,t,tan,sin,cos,h,Pi4;
+ 	NxlongR f,f2,r5,sin,cos,Pi4;
 	char istring[2200];
 	
-	int i,ep=0,Ndp=1500,expo=0,sg,N=1,fct; //  Ndp max ~ncells*6*0.6
-	double	xdbl;
+	int Ndp=500; //  Ndp max ~ncells*6*0.6
 	
-	NxlongR one,xn,fac;	
+	
+	NxlongR one;	
 	itoxR(1,&one);
 
 	
@@ -35,7 +37,7 @@ int main(int argc, char* argv[])
     }
     
 	time(&t1);
-	fprintf(OutFile,"\n\n  calculate Pi =16 arctan 0.2-4 arctan(1/239)\r",istring);
+	fprintf(OutFile,"\n\n  calculate Pi =16 arctan 0.2-4 arctan(1/239)\n");
 
 
 	itoxR(5,&r5);
@@ -61,14 +63,14 @@ int main(int argc, char* argv[])
 	Divlxr( r5,f,&r5,Ndp);// Pi/4
 	Pi4=r5;	
 	//CosSin(mpf_t x,int cs,mpf_t *CoS)	//cs 0,cos or 1,sin 
-	CosSin(Pi4,0,&cos);
+	CosSin(Pi4,0,Ndp,&cos);
 	crstrXlr(cos,Ndp,istring);
 	fprintf(OutFile,"\r\n\ncos(PI/4) =\r%s",istring);
 	
 	itoxR(2,&r5);
 	Divlxr( r5,one,&r5,Ndp);
 	NRoot(r5,2,&r5,Ndp);
-	r5.sgn+-1;
+	r5.sgn=-1;
 	addXlr(r5,cos,&r5,Ndp);
 	
 	crstrXlr(r5,20,istring);
@@ -76,6 +78,8 @@ int main(int argc, char* argv[])
 	
 	time(&t2);
 	tsec=difftime(t2, t1);
-	fprintf(OutFile,"\r\n\n total compute time  %ld sec\n",tsec);    
+	fprintf(OutFile,"\r\n\n total compute time  %lf sec\n",tsec);    
 	
 }
+
+
