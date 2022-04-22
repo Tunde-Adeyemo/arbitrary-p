@@ -905,7 +905,7 @@ void NRoot(NxlongR A, int N,NxlongR* x,int Ndp) // revised 28/03/21
 	//A.sgn=-1;
 	while (h.exp-(A.exp/N)>-Ndp) // h has been generated	
 	{
-		printf("\n\rh.exp-(A.exp/N) %d\n",h.exp-(A.exp/N));
+		//printf("\n\rh.exp-(A.exp/N) %d\n",h.exp-(A.exp/N));
 		
 		xo=*x;
 		xo.sgn *=-1;
@@ -919,8 +919,8 @@ void NRoot(NxlongR A, int N,NxlongR* x,int Ndp) // revised 28/03/21
 			
 		}	
 		addXlr(f,fda,&h,1.2*Ndp);
-		crstrXlr(h,15,istring);
-		printf("\r\nrem %s\n\r",istring);
+		//crstrXlr(h,15,istring);
+		//printf("\r\nrem %s\n\r",istring);
 
 		if(h.sgn==0)
 			return;
