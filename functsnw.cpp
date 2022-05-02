@@ -860,7 +860,7 @@ void CosSin(NxlongR x,int cs,int Ndp,NxlongR* CoS)	//cs 0,cos or 1,sin
 		itoxR(6,&fac);
 
 		f2.exp=0;
-		sg=-1;
+		sg=-1 * CoS->sgn;
 		while (f2.exp>-Ndp)
 		{
 			//addXlr(t,one,&t,Ndp);
