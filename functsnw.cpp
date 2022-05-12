@@ -699,13 +699,7 @@ inline void Divlxr(NxlongR divisor, NxlongR divend, NxlongR * quot, int dp) {
             prodxlr( * quot, divisor, & Int2, dp);
             Int2.sgn *= -1;
            
-            addXlr(divend, Int2, & X, dp);
-            if (X.sgn == rem.sgn)
-                rem = X;
-            else   {
-                rem.mant[1] = 0;
-                xnegc(&rem, dp);
-            }
+            addXlr(divend, Int2, & rem, dp);           
             if (rem.sgn == 0)
                     return;
 	}       
