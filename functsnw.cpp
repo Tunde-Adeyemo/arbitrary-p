@@ -10,9 +10,9 @@
 
 /*
 A compilation of the most updated functions of ArithXlr
-includes corrected addXlr() , Divlxr(), NRoot() with its adjunt interp()
+includes corrected addXlr() , Divlxr(), NRoot() 
 Basic functions  CosSin(), invtan() and itoxR() are included
-also the print function crtxlxr() in this form it displayed dp/100 in the line between blocks
+also the print function crtxlxr() in this form it displays dp/100 in the line between blocks
 
 
 inline void addXlr(NxlongR a, NxlongR b, NxlongR * c, int dp)
@@ -51,6 +51,9 @@ struct NxlongR {
 	int exp; //exp is the exponent of our first non zero digit of mant[1]
 	int sgn; //overall sign
 };
+
+//int df=0; 		//diagnostic global variable
+
 
 void rippleup(NxlongR* a)
 {
@@ -124,8 +127,7 @@ inline void xnegc(NxlongR * c, int dp) {
 	while (c -> mant[1] < 1e5) {
 		ep++;
 		c -> mant[1] *= 10;
-	}
-	//if(i>1)
+	}	
 	c -> exp -= ep + (i - 1) * 6;
 	if (ep > 0) {
 
@@ -535,175 +537,219 @@ inline void prodxlr(NxlongR a, NxlongR b,NxlongR* c,int dp) //25/03/14
 
 
 
+//09/01/14      20/03/16  // oscill problem  solved in rtNA.cpp in ./workbook
+inline	void Divlxr(NxlongR divisor,NxlongR divend,NxlongR* quot,int dp)
+	{
+
+		NxlongR rem,Int2,quot2,lpb,one ;
+		//char str[100];
+		double Dvisor,Dvend,Dquot;
+		
+		int ex, rmt,rp =1 ;
+		dp*=1.2;
+				
+		if(divisor.sgn==0)
+		{
+			quot->exp=12345;
+			quot->sgn=divisor.sgn*divend.sgn;
+			return;
+		}
+		if(divend.sgn==0)
+		{
+			*quot= divend;
+			quot->sgn=0;
+			return;
+		}
+
+
+		Dvisor= divisor.mant[1]*1e-5+divisor.mant[2]*1e-11;
+		Dvend= divend.mant[1]*1e-5+divend.mant[2]*1e-11;
+		Dquot=Dvend/Dvisor;
+		ex=0;
+		while (Dquot>=10)
+		{
+			Dquot/=10;
+			ex++;
+		}
+		while (Dquot<1.0)
+		{
+			Dquot*=10;
+			ex--;
+		}
+		quot->exp=ex+divend.exp-divisor.exp;
+		quot->sgn=divend.sgn*divisor.sgn;
+
+
+		Dquot*=1e5;
+		quot->mant[1]=Dquot;
+
+
+		int i=1,sf=12;		//sf for quotient is different from remainder may require increasing for validity
+
+
+		while((i+1)<=(sf+5)/6)
+		{
+			Dquot-=quot->mant[i];
+			i++;
+			Dquot*=1e6;
+			quot->mant[i]=Dquot;
+		}
+		while(i<ncells-1)
+		{
+			i++;
+			quot->mant[i]=0;
+
+		}
+
+		xnegc(quot,dp);
+		
+		//
+		Int2 = divisor;   // divisor ~ divend
+		Int2.sgn = -divend.sgn;
+		addXlr(Int2, divend, &Int2, dp);
+		Int2.sgn *=divend.sgn;
+		
+		if(Int2.exp - divend.exp <= -12)   // if divisor ~ divend  
+		{  
+			int tmp1;
+			tmp1=1;
 			
+			for(i=1;i<ncells;i++)
+				one.mant[i]=0;
+
+			one.exp=0;
+			one.sgn= 1;
+
+			tmp1*=1e5;
+			one.mant[1]=tmp1+0.05;
+					
+		    int qs = quot -> sgn;
+		    
+		    Dvend = Int2.mant[1] * 1e-5 + Int2.mant[2] * 1e-11 + Int2.mant[3] * 1e-17 ;
+		    Int2.exp = Int2.exp - divend.exp;
+		    
+		    Dquot = Dvend / Dvisor; 
+		    ex = 0;
+		    while (abs(Dquot) >= 10) {
+		            Dquot /= 10;
+		            ex++;
+		    }
+		    while (abs(Dquot) < 1.0) {
+		            Dquot *= 10;
+		            ex--;
+		    }
+		    rem.exp = Int2.exp;
+		    
+		    Dquot *= 1e5;
+		    rem. mant[1] = Dquot;
+
+		    i = 1;
+		    while ((i + 1) <= (sf + 5) / 6) {
+		    Dquot -= rem. mant[i];
+		    i++;
+		    Dquot *= 1e6;
+		    rem. mant[i] = Dquot;
+		    }
+		    while (i < ncells - 1) {
+		            i++;
+		            rem.mant[i] = 0; 
+		    }
+
+		    addXlr(one,  rem, quot, dp);		
+		    quot->sgn = qs;
+		} 			//   **
+
+		prodxlr(*quot,divisor,&Int2,dp);
+	            
+        	Int2.sgn*=-1;
+		addXlr(divend,Int2,&rem,dp);
+
+		if(rem.sgn==0)
+			return;
+
+		rmt=rem.exp;
+		rp=1;
+	
+		//int ii=1;    // for diag print
+		while(divend.exp-rem.exp<0.82*dp)		// 0.82  dp =1.5 dp(in)0.68, 1.3 0.8
+		{
+	
+			Dvend= rem.mant[1]*1e-5+rem.mant[2]*1e-11;
+			Dquot=Dvend/Dvisor;
+			ex=0;
+
+				while (Dquot>=10)
+				{
+					Dquot/=10;
+					ex++;
+				}
+				while (Dquot<1.0)
+				{
+					Dquot*=10;
+					ex--;
+				}
+
+
+				quot2.exp=ex+rem.exp-divisor.exp;
+				quot2.sgn=rem.sgn*divisor.sgn;
+
+				Dquot*=1e5;
+				quot2.mant[1]=Dquot;
+
+
+				i=1;
+				while((i+1)<=(sf+5)/6)
+				{
+					Dquot-=quot2.mant[i];
+					i++;
+					Dquot*=1e6;
+					quot2.mant[i]=Dquot;
+				}
+				while(i<ncells-2)
+				{
+					i++;
+					quot2.mant[i]=0;
+
+				}
+				xnegc(&quot2,dp);
 			
-//True working ver of Divlxr as at 21/12/13
-//09/01/14  //corrected 25/03/21 /03/05/21
-inline void Divlxr(NxlongR divisor, NxlongR divend, NxlongR * quot, int dp) {
+				addXlr(*quot,quot2,quot,dp);
 
-	NxlongR rem,  Int2, quot2,one, X;//Int1,
-        dp = 1.4*dp;
-	double Dvisor, Dvend, Dquot;
-	int ex,i;
+				prodxlr(*quot,divisor,&Int2,dp);
+				Int2.sgn*=-1;
+				addXlr(divend,Int2,&rem,dp);
+
+				
+				if(rem.sgn==0)
+					return;
+				
+		
+				if (rem.exp ==rmt)
+				{
+					rp ++;
+					if (rp == 8)
+						lpb = quot2;
+										
+					if(rp > 8 )
+					{
 	
-	i=1;
-	one.mant[i]=100000;
-	while (i < ncells - 1) {
-		i++;
-		one.mant[i] = 0;
-	}
-	one.exp= 0;
-	one.sgn= 1;
+						addXlr(lpb,quot2,&quot2,dp);
+						if (quot2.sgn == 0)
+								return;
+						addXlr(*quot,quot2,quot,dp);
 	
+					}						
+					
+				}
+				else
+				{
+					rmt = rem.exp;
+					rp = 1;
+				}
+		}   // end while
 
-	if (divisor.sgn == 0) {
-		quot -> exp = 12345;
-		quot -> sgn = divisor.sgn * divend.sgn;
-		return;
-	}
-	if (divend.sgn == 0) {
-		quot -> sgn = 0;
-		return;
-	}
-
-	Dvisor = divisor.mant[1] * 1e-5 + divisor.mant[2] * 1e-11 + divisor.mant[3] * 1e-17 ;
-	Dvend = divend.mant[1] * 1e-5 + divend.mant[2] * 1e-11 + divend.mant[3] * 1e-17 ;
-	Dquot = Dvend / Dvisor;
-	ex = 0;
-	while (abs(Dquot) >= 10) {
-		Dquot /= 10;
-		ex++;
-	}
-	while (abs(Dquot) < 1.0) {
-		Dquot *= 10;
-		ex--;
-	}
-	quot -> exp = ex + divend.exp - divisor.exp;
-	quot -> sgn = divend.sgn * divisor.sgn;
 	
-	
-	Dquot *= 1e5;
-	quot -> mant[1] = Dquot;
-
-
-	int  sf = 12; //, sfc, i2, m10sf for quotient is different from remainder may require increasing for validity
-	i = 1;
-
-	while ((i + 1) <= (sf + 5) / 6) {
-		Dquot -= quot -> mant[i];
-		i++;
-		Dquot *= 1e6;
-		quot -> mant[i] = Dquot;
 	}
-	while (i < ncells - 1) {
-		i++;
-		quot -> mant[i] = 0;
-
-	}
-
-	xnegc(quot, dp);
-        
-        Int2 = one;
-        Int2.sgn = -quot->sgn;
-        addXlr(Int2, *quot, &Int2, dp);
-        if(Int2.exp - divend.exp <= -12)  
-        {            
-           
-            divisor.sgn *= -1;
-            addXlr(divend, divisor, & X, dp);
-            divisor.sgn *= -1;
-
-            Dvend = X.mant[1] * 1e-5 + X.mant[2] * 1e-11 + X.mant[3] * 1e-17;
-            Dquot = Dvend / Dvisor;
-            ex = 0;
-            while (abs(Dquot) >= 10) {
-                    Dquot /= 10;
-                    ex++;
-            }
-            while (abs(Dquot) < 1.0) {
-                    Dquot *= 10;
-                    ex--;
-            }
-            rem.exp = ex + X.exp - divisor.exp;
-            rem.sgn = divisor.sgn * X.sgn; 
-
-            Dquot *= 1e5;
-            rem. mant[1] = Dquot;
-
-            i = 1;
-            while ((i + 1) <= (sf + 5) / 6) {
-            Dquot -= rem. mant[i];
-            i++;
-            Dquot *= 1e6;
-            rem. mant[i] = Dquot;
-            }
-            while (i < ncells - 1) {
-                    i++;
-                    rem.mant[i] = 0; 
-            }
-
-            addXlr(one,  rem, quot, dp);
-        }
-               
-        prodxlr( * quot, divisor, & Int2, dp);
-	
-	Int2.sgn *= -1;		//******
-
-	addXlr(divend, Int2, & rem, dp);
-
-	if (rem.sgn == 0)
-		return;
-
-	while (divend.exp - rem.exp <=  dp*0.8 ) //dp =1.5 dp(in)0.68,
-	{   
-            Dvend = rem.mant[1] * 1e-5 + rem.mant[2] * 1e-11+ rem.mant[3] * 1e-17;
-            Dvisor = divisor.mant[1] * 1e-5 + divisor.mant[2] * 1e-11+ divisor.mant[3] * 1e-17;
-            Dquot = Dvend / Dvisor;
-                  
-
-                ex = 0;
-
-                while (abs(Dquot) >= 10) {
-                        Dquot /= 10;
-                        ex++;
-                }
-                while (abs(Dquot) < 1.0) {
-                        Dquot *= 10;
-                        ex--;
-                }
-
-                quot2.exp = ex + rem.exp - divisor.exp;
-                quot2.sgn = rem.sgn * divisor.sgn;
-
-
-                Dquot *= 1e5;
-                quot2.mant[1] = Dquot;
-
-
-                i = 1;
-                while ((i + 1) <= (sf + 5) / 6) {
-                        Dquot -= quot2.mant[i];
-                        i++;
-                        Dquot *= 1e6;
-                        quot2.mant[i] = Dquot;
-                }
-                while (i < ncells - 1) {
-                        i++;
-                        quot2.mant[i] = 0;
-
-                }                
-
-                addXlr( * quot, quot2, quot, dp);
-         
-            quot -> sgn = divend.sgn * divisor.sgn;
-            prodxlr( * quot, divisor, & Int2, dp);
-            Int2.sgn *= -1;
-           
-            addXlr(divend, Int2, & rem, dp);           
-            if (rem.sgn == 0)
-                    return;
-	}       
-}
 
 void itoxR(int intg,NxlongR* xlo)
 {
@@ -739,48 +785,20 @@ void itoxR(int intg,NxlongR* xlo)
 
 }
 
-void invtan(NxlongR x,NxlongR* Itan,int dp)
-{
-	
-	NxlongR xp,div,term,two;
-	int sg=1,sdp=-dp;
-        
-        if(x.exp<0)
-            sdp=-dp+x.exp;
-            
-	
-
-	*Itan=term=xp=x;
-	itoxR(2,&two);
-	itoxR(1,&div);
-	
-	prodxlr(x, x,&x,dp);
-	while(term.exp>sdp)
-	{
-		sg*=-1;
-		addXlr(div,two,&div,dp);
-		prodxlr(xp, x,&xp,dp);
- 		Divlxr( div,xp,&term,dp);
-		term.sgn=sg;		//term.sgn *=sg
-		addXlr(*Itan,term,Itan,dp);
-
-	}
-	return;
-	
-}
-		
-
-
 
 inline void crstrXlr(NxlongR xlr,int sf,char* ostr)
 {
 	char var[30];
 	int i,tprt,t2,i0,ep=0;
-	tprt= t2=xlr.sgn*xlr.mant[1],i=1;
+	tprt= t2=xlr.sgn*xlr.mant[1];
+	
 	for(i=1;i<=5;i++)
 		tprt/=10;
-
-	sprintf(ostr,"\r  %i.",tprt);
+	
+	sprintf(ostr,"\n  %i.",tprt);
+	
+	//sprintf(ostr,"\n   ");
+	//	strcat(ostr,tprt);
 		for(i=1;i<=5;i++)
 		tprt*=10;
 
@@ -835,10 +853,43 @@ inline void crstrXlr(NxlongR xlr,int sf,char* ostr)
 
 } 
 
+void invtan(NxlongR x,NxlongR* Itan,int dp)
+{
+	
+	NxlongR xp,div,term,two;
+	int sg=1,sdp=-dp;
+	char istr[500];
+        
+        if(x.exp<0)
+            sdp=-dp+x.exp;
+            
+	
+
+	*Itan=term=xp=x;
+	itoxR(2,&two);
+	itoxR(1,&div);
+	
+	prodxlr(x, x,&x,dp);
+	while(term.exp>sdp)
+	{
+		sg*=-1;
+		addXlr(div,two,&div,dp);
+		prodxlr(xp, x,&xp,dp);
+ 		Divlxr( div,xp,&term,dp);
+		term.sgn=sg;		//term.sgn *=sg
+		addXlr(*Itan,term,Itan,dp);
+	
+	}
+	return;
+	
+}
+
+
 void CosSin(NxlongR x,int cs,int Ndp,NxlongR* CoS)	//cs 0,cos or 1,sin 
 {
 	NxlongR xn,fac,f2,t;
 	int fct,sg;
+	
 	itoxR(1,CoS);
 	if(cs==1)
 	*CoS=x;
@@ -857,8 +908,7 @@ void CosSin(NxlongR x,int cs,int Ndp,NxlongR* CoS)	//cs 0,cos or 1,sin
 		sg=-1 * CoS->sgn;
 		while (f2.exp>-Ndp)
 		{
-			//addXlr(t,one,&t,Ndp);
-		
+			
 			prodxlr(x,xn,&xn,Ndp);
 			
 			Divlxr(fac,xn,&f2,Ndp);
@@ -870,67 +920,82 @@ void CosSin(NxlongR x,int cs,int Ndp,NxlongR* CoS)	//cs 0,cos or 1,sin
 				prodxlr(fac,t,&fac,Ndp);
 			}
 			
-		//	if(cs==0)
-		//	prodxlr(x,xn,&xn,Ndp);
-
 			addXlr(f2,*CoS,CoS,Ndp);
+			
 			sg*=-1;
-		}
-		//cos,sin =f;
+		}	
 		return;	
 }
-
-
-void NRoot(NxlongR A, int N,NxlongR* x,int Ndp) // revised 28/03/21
-{												// using a(i+1) = a(i)/(1+(a(i)^n - A)/nA)	
-	NxlongR f,h,fda,n,mone,xo;					// as in fnsconvrt.cpp
-	int i;
+void NRoot(NxlongR A, int N,NxlongR* x,int Ndp)  //05/22   /uses
+// x(n+1)=ANx(n)/(AN-y) , y = x(n)^N -A
+{
+	NxlongR one,y,na;
+	int i, i2=1,ye= A.exp,aN;	
 	char istring[100];
-
-
-	fda=A;
-	fda.sgn *=-1;
+	Ndp*=1.2;
 	
-	h.exp =(A.exp+N-1)/N;	
-	itoxR(1,&mone);		
-	*x =mone;
-	mone.sgn=-1;	
-	itoxR(N,&n);	
-	//A.sgn=-1;
-	while (h.exp-(A.exp/N)>-Ndp) // h has been generated	
+	
+	aN=N;
+	itoxR(1,&one);
+	if (N < 0)
 	{
-		//printf("\n\rh.exp-(A.exp/N) %d\n",h.exp-(A.exp/N));
-		
-		xo=*x;
-		xo.sgn *=-1;
+		printf("\nN is %d\n",N);
+		Divlxr( A,one,&A,1.2*Ndp);
+		crstrXlr(A,15,istring);
+		printf("\n 1/A 	%s ",istring);
+		aN *= -1;
+	}
 	
-		prodxlr(*x, *x,&f,1.2*Ndp);
-
-		for(i=3;i<=N;++i)
+	itoxR(aN,&na);
+	*x=y=one;
+		             
+    if((A.exp==-1 && A.mant[1]<800000) ||A.exp<-1 )
+     {
+		 Divlxr( na,A,&y,Ndp);
+         if(A.exp<-5)
 		{
-			
-			prodxlr(*x, f,&f,1.2*Ndp);
-			
-		}	
-		addXlr(f,fda,&h,1.2*Ndp);
-		//crstrXlr(h,15,istring);
-		//printf("\r\nrem %s\n\r",istring);
-
-		if(h.sgn==0)
-			return;
-			
-		Divlxr( A,f,&f,1.2*Ndp);
-		
-		addXlr(f,mone,&f,1.2*Ndp);
-		addXlr(f,n,&f,1.2*Ndp);
-		
-		Divlxr( f,n,&f,1.2*Ndp);	
-		
-		prodxlr(f, *x,x,1.2*Ndp);
-		addXlr(*x,xo,&h,Ndp*1.2);
-		//crstrXlr(h,15,istring);
-		//printf("\r\nh %s\n\r",istring);
-		//fprintf(OutFile,"\r\nh %s\n\r",istring);		
+		    y.exp=(A.exp-aN+1)/aN;
+		} 
+         
+         *x=y;
+	 }	
+	prodxlr(*x, *x,&y,Ndp);
+	for(i=3;i<=aN;++i)
+	{
+		prodxlr(*x, y,&y,Ndp);
 	}	
-
-}
+	prodxlr(na, A,&na,Ndp); 
+	A.sgn*=-1;       // -A
+	
+	
+	addXlr(y,A,&y,Ndp);	
+	
+	addXlr(y,na,&y,Ndp);
+	Divlxr( y,*x,&y,Ndp);	
+		
+	prodxlr(na, y,x,Ndp);	
+	
+	while(A.exp-ye< 0.9*Ndp )	
+	{			
+		prodxlr(*x, *x,&y,Ndp);		
+		for(i=3;i<=aN;++i)
+		{
+			prodxlr(*x, y,&y,Ndp);
+		}
+		addXlr(y,A,&y,Ndp);	
+				
+		if (y.sgn == 0)
+			break;
+		ye = y.exp;
+		
+		addXlr(y,na,&y,Ndp);		
+		
+		Divlxr( y,*x,&y,Ndp);
+				
+		prodxlr(na, y,x,Ndp);		
+		i2++;	             
+	}
+	if(N<0)
+		printf("\nN is %d\n",N);
+	return;
+}			
