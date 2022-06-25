@@ -1,13 +1,13 @@
 
 /*
-Place this file in the same directory as functns.cpp to compile.
-main(), tests the routines in functnw.cpp and writes the output to local file tstfns.txt, it uses invtan() and
+Place this file in the same directory as functsnw.cpp to compile.
+main(), tests the routines in functsnw.cpp and writes the output to local file tstfns.txt, it uses invtan() and
 the Gregory series to efficiently calculate Pi to the desired precision then it uses NRoot() to produce root(1/2),
 knowing cos(Pi/4) = root(1/2) it then calculates cos(Pi/4) - root(1/2) and writes the value. Finally it writes the 
 number of seconds used for computation.
 */
 
-#include "./functns.cpp"
+#include "./functsnw.cpp"
 int main(int argc, char* argv[])
 {
 	//FILE* OutFile;
